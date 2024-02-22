@@ -5,3 +5,4 @@ from django.utils.translation import gettext_lazy as _
 
 class MyUser(AbstractUser):
     email = models.EmailField(_('email address'), blank=True, unique=True,)
+    bio = models.CharField(_('bio'), max_length=256, blank=True)
