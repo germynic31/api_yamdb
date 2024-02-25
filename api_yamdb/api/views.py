@@ -16,7 +16,7 @@ from .serializers import (
 class UserViewSet(viewsets.ModelViewSet):
     queryset = MyUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = IsAdminUser
+    permission_classes = (IsAdminUser, )
 
     def get_permissions(self):
         if self.action == 'retrieve':
