@@ -1,3 +1,6 @@
-from django.shortcuts import render
+from rest_framework_simplejwt.tokens import AccessToken
 
-# Create your views here.
+
+def get_token_for_user(user):
+    token = AccessToken.for_user(user)
+    return {'access': str(token), }
