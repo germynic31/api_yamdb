@@ -33,10 +33,3 @@ class UserSerializer(serializers.ModelSerializer):
         )
         user.save()
         return user
-
-
-class EmailConfirmSerializer(serializers.ModelField):
-
-    class Meta:
-        model = MyUser
-        fields = ('email', 'username')
