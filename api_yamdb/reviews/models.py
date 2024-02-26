@@ -1,42 +1,108 @@
+from datetime import datetime
+
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
+from user.models import MyUser
+
 
 class Genre(models.Model):
-    name = models.CharField(max_length=256)
-    slug = models.SlugField(max_length=50, unique=True)
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название'
+    )
+    slug = models.SlugField(
+        max_length=50,
+        unique=True,
+        verbose_name='slug'
+    )
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
     def __str__(self):
         return self.name
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=256)
-    slug = models.SlugField(max_length=50, unique=True)
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название'
+    )
+    slug = models.SlugField(
+        max_length=50,
+        unique=True,
+        verbose_name='slug'
+    )
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
     def __str__(self):
         return self.name
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=256)
-    year = models.IntegerField()  # TODO: add validation on serializer
-    description = models.TextField(null=True, blank=True)
-    genre = models.ManyToManyField(Genre, through='GenreTitle')
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название'
+    )
+    year = models.IntegerField(
+        validators=[
+            MinValueValidator(
+                0,
+                'Год выпуска произведения не может быть меньше 0'
+            ),
+            MaxValueValidator(
+                datetime.now().year,
+                'Год выпуска произведения не может быть больше текущего'
+            )
+        ],
+        verbose_name='Год выпуска'
+    )
+    description = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name='Описание'
+    )
+    genre = models.ManyToManyField(
+        Genre,
+        through='GenreTitle',
+        related_name='titles',
+        verbose_name='Жанр'
+    )
     category = models.ForeignKey(
         Category,
+        related_name='titles',
         on_delete=models.SET_NULL,
         null=True,
-        blank=False
+        blank=False,
+        verbose_name='Категория'
     )
+
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
 
     def __str__(self):
         return self.name
 
 
 class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True)
-    title = models.ForeignKey(Title, on_delete=models.SET_NULL, null=True)
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name='Жанр'
+    )
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name='Произведение'
+    )
 
     def __str__(self):
         return f'{self.title}, {self.genre}'
@@ -53,7 +119,7 @@ class Review(models.Model):
         verbose_name='Текст ревью',
     )
     author = models.ForeignKey(
-        User,
+        MyUser,
         on_delete=models.CASCADE,
         related_name='reviews',
         verbose_name='Автор',
@@ -92,7 +158,7 @@ class Comment(models.Model):
         related_name='comments'
     )
     author = models.ForeignKey(
-        User,
+        MyUser,
         verbose_name='Пользователь',
         on_delete=models.CASCADE,
         related_name='comments'
