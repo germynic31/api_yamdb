@@ -12,7 +12,8 @@ class MyUserAdmin(UserAdmin):
         'email',
         'first_name',
         'last_name',
-        'bio'
+        'bio',
+        'role',
     )
 
     add_fieldsets = (
@@ -25,6 +26,7 @@ class MyUserAdmin(UserAdmin):
                     'bio',
                     'first_name',
                     'last_name',
+                    'role',
                 )
             }
         )
@@ -37,6 +39,7 @@ class MyUserAdmin(UserAdmin):
             {
                 'fields': (
                     'bio',
+                    'role',
                 )
             }
         )
