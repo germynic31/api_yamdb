@@ -1,4 +1,3 @@
-import csv
 import os
 
 import django
@@ -8,18 +7,36 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api_yamdb.settings')
 if not settings.configured:
     django.setup()
 
+import csv
+import logging
+
+from django.db import IntegrityError
 from reviews.models import Title, Category, Genre, GenreTitle, Comment, Review
 from user.models import MyUser
 
+
 def import_data_from_csv(file_path, model):
-    with open(file_path, 'r') as file:
+    DEBUG_MESSAGE = f'path: {file_path}, model: {model}'
+    with open(file_path, 'r', encoding='utf-8') as file:
         reader = csv.DictReader(file)
         columns = reader.fieldnames
+        logging.debug('Началась загрузка csv файла\n' + DEBUG_MESSAGE)
         for row in reader:
             data = {}
             for column in columns:
-                data[column] = row[column]
-            model.objects.create(**data)
+                if column == 'category':
+                    category_id = int(row[column])
+                    data[column] = Category.objects.get(id=category_id)
+                elif column == 'author':
+                    user_id = int(row[column])
+                    data[column] = MyUser.objects.get(id=user_id)
+                else:
+                    data[column] = row[column]
+            try:
+                model.objects.create(**data)
+            except IntegrityError:
+                pass
+        logging.debug('Завершилась загрузка csv файла\n' + DEBUG_MESSAGE)
 
 
 paths_models = [
