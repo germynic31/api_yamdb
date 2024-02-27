@@ -82,3 +82,10 @@ class CreateUpdateDestroyTitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+
+
+class EmailConfirmSerializer(serializers.ModelField):
+
+    class Meta:
+        model = MyUser
+        fields = ('email', 'username')
