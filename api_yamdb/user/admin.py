@@ -49,5 +49,4 @@ class MyUserAdmin(UserAdmin):
 class RoleAdmin(admin.ModelAdmin):
     model = Role
     list_display = ('name',)
-    add_fieldsets = (*UserAdmin.fieldsets,)
-    fieldsets = (*UserAdmin.fieldsets,)
+    add_fieldsets = ('name',)
