@@ -21,8 +21,8 @@ class Role(models.Model):
     objects = RoleManager()
 
     class Meta:
-        verbose_name = _('group')
-        verbose_name_plural = _('groups')
+        verbose_name = _('role')
+        verbose_name_plural = _('roles')
 
     def __str__(self):
         return self.name
@@ -35,13 +35,11 @@ class MyUser(AbstractUser):
         blank=True,
         unique=True,
     )
-    role = models.ForeignKey(
+    role = models.ManyToManyField(
         Role,
         verbose_name=_('roles'),
         blank=True,
         related_name="user_set",
         related_query_name="user",
-        default='user',
-        on_delete=models.CASCADE
     )
     bio = models.CharField(_('bio'), max_length=256, blank=True)

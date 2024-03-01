@@ -1,16 +1,10 @@
-from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from rest_framework import viewsets
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAdminUser
-
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework_simplejwt.tokens import AccessToken
 from user.models import MyUser
-from reviews.models import Title, Category, Genre
-from .mixins import ListDestroyCreateMixin
-from .serializers import (
-    UserSerializer, CategorySerializer,
-    GenreSerializer, CreateUpdateDestroyTitleSerializer,
-    ListRetrieveTitleSerializer,
-)
+from .serializers import UserSerializer, EmailConfirmSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -24,3 +18,23 @@ class UserViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
 
+class EmailViewSet(viewsets.ModelViewSet):
+    queryset = MyUser.objects.all()
+    serializer_class = EmailConfirmSerializer
+    permission_classes = (IsAuthenticated, )
+
+    def mail(self):
+        token = default_token_generator.make_token(self.request.user)
+
+        send_mail(
+            subject='Код подтверждения',
+            message=f'Токен для подтверждения: {token}',
+            from_email='from@example.com',
+            recipient_list=[self.request.user.email],
+            fail_silently=True,
+        )
+
+
+def get_token_for_user(user):
+    token = AccessToken.for_user(user)
+    return {'access': str(token), }
