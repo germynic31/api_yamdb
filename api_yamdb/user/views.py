@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework_simplejwt.tokens import AccessToken
 from user.models import MyUser
 from .serializers import UserSerializer, EmailConfirmSerializer
+from .premissions import ReadOnly
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -14,7 +15,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'retrieve':
-            return (ReadOnly(),) #TODO сделаю в другой ветке
+            return (ReadOnly(),)
         return super().get_permissions()
 
 
