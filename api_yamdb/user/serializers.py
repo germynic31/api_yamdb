@@ -40,3 +40,11 @@ class EmailConfirmSerializer(serializers.ModelField):
     class Meta:
         model = MyUser
         fields = ('email', 'username')
+
+
+class TokenSerializer(serializers.ModelField):
+    confirmation_code = serializers.CharField()
+
+    class Meta:
+        model = MyUser
+        fields = ('username', 'confirmation_code')
