@@ -1,31 +1,16 @@
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
-from user.models import MyUser
 from reviews.models import Title, Category, Genre, Review
 from .mixins import ListDestroyCreateMixin
 from .serializers import (
-    UserSerializer, CategorySerializer,
+    CategorySerializer,
     GenreSerializer, CreateUpdateDestroyTitleSerializer,
-    ListRetrieveTitleSerializer, EmailConfirmSerializer,
+    ListRetrieveTitleSerializer,
     ReviewSerializer, CommentSerializer
 )
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = MyUser.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (IsAdminUser, )
-
-    def get_permissions(self):
-        if self.action == 'retrieve':
-            return (ReadOnly(),) #TODO сделаю в другой ветке
-        return super().get_permissions()
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -48,25 +33,8 @@ class GenreViewSet(ListDestroyCreateMixin):
 class CategoryViewSet(ListDestroyCreateMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-
-
-class EmailViewSet(viewsets.ModelViewSet):
-    queryset = MyUser.objects.all()
-    serializer_class = EmailConfirmSerializer
-    permission_classes = (IsAuthenticated, )
-
-    def mail(self):
-        token = default_token_generator.make_token(self.request.user)
-
-        send_mail(
-            subject='Код подтверждения',
-            message=f'Токен для подтверждения: {token}',
-            from_email='from@example.com',
-            recipient_list=[self.request.user.email],
-            fail_silently=True,
-        )
-
-
+    
+    
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     # permission_classes
