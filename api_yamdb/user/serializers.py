@@ -3,6 +3,8 @@ from rest_framework import serializers
 from user.models import MyUser
 
 
+
+
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -35,14 +37,20 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class EmailConfirmSerializer(serializers.ModelField):
+class EmailConfirmSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MyUser
         fields = ('email', 'username')
 
+    def validate_username(self, value):
+        if 'me' == value:
+            raise serializers.ValidationError(
+                'Нельзя использовать username "me"!')
+        return value
 
-class TokenSerializer(serializers.ModelField):
+
+class TokenSerializer(serializers.ModelSerializer):
     confirmation_code = serializers.CharField()
 
     class Meta:

@@ -16,8 +16,9 @@ router_v1.register(r'titles/(?P<title_id>\d+)/reviews'
                    r'/(?P<review_id>\d+)/comments',
                    CommentViewSet, basename='comments')
 router_v1.register('users', UserViewSet, basename='users')
-router_v1.register('auth/signup', EmailViewSet, basename='singup')
 router_v1.register('auth/token', TokenViewSet, basename='token')
+router_v1.register('auth', EmailViewSet, basename='singup')
+
 
 
 urlpatterns = [
