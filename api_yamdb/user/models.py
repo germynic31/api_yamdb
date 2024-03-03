@@ -21,7 +21,7 @@ class MyUser(AbstractUser):
         _('role'),
         max_length=28,
         choices=ROLES,
-        default='user'
+        default='Пользователь'
     )
     bio = models.CharField(_('bio'), max_length=256, blank=True)
     confirmation_code = models.CharField(max_length=6)

@@ -5,7 +5,7 @@ from user.models import MyUser
 
 
 @admin.register(MyUser)
-class MyUserAdmin(UserAdmin):
+class MyUserAdmin(admin.ModelAdmin):
     model = MyUser
     list_display = (
         'username',
@@ -13,6 +13,7 @@ class MyUserAdmin(UserAdmin):
         'first_name',
         'last_name',
         'bio',
+        'role'
     )
 
     add_fieldsets = (
@@ -25,6 +26,7 @@ class MyUserAdmin(UserAdmin):
                     'bio',
                     'first_name',
                     'last_name',
+                    'role'
                 )
             }
         )
@@ -37,6 +39,7 @@ class MyUserAdmin(UserAdmin):
             {
                 'fields': (
                     'bio',
+                    'role'
                 )
             }
         )
