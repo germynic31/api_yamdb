@@ -71,9 +71,22 @@ class TokenViewSet(viewsets.GenericViewSet):
     queryset = MyUser.objects.all()
     serializer_class = TokenSerializer
 
+    @action(methods=['post'], detail=False, url_path='token')
     def get_token_for_user(self, serializer):
         if default_token_generator.check_token(
-            self.request.user, serializer.data['confirmation_code']
+            MyUser.objects.get(username=serializer.data['username']),
+            serializer.data['confirmation_code']
         ):
-            token = AccessToken.for_user(self.request.user)
-            return {'access': str(token), }
+            token = AccessToken.for_user(MyUser.objects.get(username=serializer.data['username']))
+            headers = self.get_success_headers(serializer.data)
+            return Response(
+                {'access': str(token), },
+                status=status.HTTP_200_OK,
+                headers=headers
+            )
+
+    def get_success_headers(self, data):
+        try:
+            return {'Location': str(data[api_settings.URL_FIELD_NAME])}
+        except (TypeError, KeyError):
+            return {}
