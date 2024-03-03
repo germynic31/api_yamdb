@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from user.models import MyUser, Role
+from user.models import MyUser
 
 
 @admin.register(MyUser)
@@ -25,7 +25,6 @@ class MyUserAdmin(UserAdmin):
                     'bio',
                     'first_name',
                     'last_name',
-                    'role',
                 )
             }
         )
@@ -38,15 +37,7 @@ class MyUserAdmin(UserAdmin):
             {
                 'fields': (
                     'bio',
-                    'role',
                 )
             }
         )
     )
-
-
-@admin.register(Role)
-class RoleAdmin(admin.ModelAdmin):
-    model = Role
-    list_display = ('name',)
-    add_fieldsets = ('name',)

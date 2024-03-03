@@ -42,9 +42,15 @@ class EmailViewSet(viewsets.GenericViewSet):
     @action(methods=['post'], detail=False, url_path='signup')
     def mail(self, serializer):
         logging.info('зашёл в мэйл')
-        user = MyUser.objects.get(username=serializer.data['username'])
+        try:
+            user = MyUser.objects.get(username=serializer.data['username'])
+        except Exception:
+            user = MyUser.objects.create(
+                username=serializer.data['username'],
+                email=serializer.data['email'],
+            )
         logging.info(user)
-        token = default_token_generator.make_token(user)
+        token = user.confirmation_code
         logging.info(token)
         send_mail(
             subject='Код подтверждения',
