@@ -35,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class EmailConfirmSerializer(serializers.ModelSerializer):
+class SignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MyUser

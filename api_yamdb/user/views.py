@@ -1,11 +1,11 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from rest_framework import viewsets
+from rest_framework import viewsets, views
 from rest_framework.permissions import IsAdminUser
 from rest_framework_simplejwt.tokens import AccessToken
 from user.models import MyUser
 from .serializers import (
-    UserSerializer, EmailConfirmSerializer, TokenSerializer
+    UserSerializer, SignupSerializer, TokenSerializer
 )
 from rest_framework import status
 from rest_framework.response import Response
@@ -14,6 +14,7 @@ from django.contrib.auth.tokens import default_token_generator
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
+from utils import generate_confirmation_code, check_confirmation_code
 
 
 import logging
@@ -33,6 +34,34 @@ class UserViewSet(viewsets.ModelViewSet):
     #     if self.action == 'retrieve':
     #        return (ReadOnly(),)
     #   return super().get_permissions()
+
+
+class SignupView(views.APIView):
+
+    def post(self, request):
+        serializer = SignupSerializer(data=request.data)
+        serializer.is_valid
+        username = serializer.validated_data.get('username')
+        email = serializer.validated_data.get('email')
+        try:
+            user, created = MyUser.objects.get_or_create(
+                username=username,
+                email=email,
+            )
+        except Exception:
+            return Response(
+                dict[('error', 'Username или email уже есть в системе.'),],
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        confirmation_code = generate_confirmation_code(user)
+        send_mail(
+            subject='Код подтверждения',
+            message=f'Токен для подтверждения: {confirmation_code}',
+            from_email='from@example.com',
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class EmailViewSet(viewsets.GenericViewSet):

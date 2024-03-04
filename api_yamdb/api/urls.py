@@ -3,7 +3,7 @@ from rest_framework import routers
 
 
 from .views import ReviewViewSet, CommentViewSet, TitleViewSet, GenreViewSet, CategoryViewSet
-from user.views import EmailViewSet, UserViewSet, TokenViewSet
+from user.views import EmailViewSet, UserViewSet, TokenViewSet, SignupView
 
 
 router_v1 = routers.DefaultRouter()
@@ -17,7 +17,7 @@ router_v1.register(r'titles/(?P<title_id>\d+)/reviews'
                    CommentViewSet, basename='comments')
 router_v1.register('users', UserViewSet, basename='users')
 router_v1.register('auth', TokenViewSet, basename='token')
-router_v1.register('auth', EmailViewSet, basename='singup')
+router_v1.register('auth/signup', SignupView, basename='singup')
 
 
 
