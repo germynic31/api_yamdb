@@ -16,6 +16,8 @@ router_v1.register(r'titles/(?P<title_id>\d+)/reviews'
                    r'/(?P<review_id>\d+)/comments',
                    CommentViewSet, basename='comments')
 router_v1.register('users/', UserViewSet, basename='users')
+router_v1.register('users/me', UserViewSet, basename='me')
+router_v1.register(r'/(users/?P<user_username>\d+)', UserViewSet, basename='user')
 
 urlpatterns = [
     path('v1/auth/signup/', SignupView.as_view()),

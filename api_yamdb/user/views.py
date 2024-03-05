@@ -1,4 +1,3 @@
-from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from rest_framework import viewsets, views
 from rest_framework.permissions import IsAdminUser, AllowAny
@@ -10,11 +9,9 @@ from .serializers import (
 from rest_framework import status
 from rest_framework.response import Response
 from django.core.mail import send_mail
-from django.contrib.auth.tokens import default_token_generator
-from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.settings import api_settings
 from .utils import generate_confirmation_code, check_confirmation_code
+from .premissions import ReadOnly
 
 
 import logging
@@ -30,10 +27,10 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (IsAdminUser, )
 
-    #def get_permissions(self):
-    #    if self.action == 'retrieve':
-    #        return (ReadOnly(),)
-    #    return super().get_permissions()
+    def get_permissions(self):
+        if self.action == 'retrieve':
+            return (ReadOnly(),)
+        return super().get_permissions()
 
 
 class SignupView(views.APIView):
@@ -43,7 +40,7 @@ class SignupView(views.APIView):
         logging.info('зашёл в пост')
         serializer = SignupSerializer(data=request.data)
         logging.info('выбрал сериалайзер')
-        serializer.is_valid(raise_exception=True)
+        serializer.is_valid(raise_exception=False)
         logging.info('валидация')
         username = serializer.validated_data.get('username')
         logging.info('имя')
@@ -78,9 +75,8 @@ class TokenView(views.APIView):
 
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data.get('username')
-        confirmation_code = serializer.validated_data.get('confirmation_code')
+        username = serializer.get('username')
+        confirmation_code = serializer.get('confirmation_code')
         user = MyUser.objects.get(username=username)
         if check_confirmation_code(user, confirmation_code):
             return Response(
