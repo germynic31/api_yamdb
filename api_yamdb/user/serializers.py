@@ -35,8 +35,21 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class EmailConfirmSerializer(serializers.ModelField):
+class SignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MyUser
         fields = ('email', 'username')
+
+    def validate_username(self, value):
+        if 'me' == value:
+            raise serializers.ValidationError(
+                'Нельзя использовать username "me"!')
+        return value
+
+
+class TokenSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MyUser
+        fields = ('username', 'confirmation_code')
