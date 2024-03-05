@@ -7,6 +7,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 from user.models import MyUser
+from user.permissions import ModerPermisiion
 from reviews.models import Title, Category, Genre, Review
 from .mixins import ListDestroyCreateMixin
 from .serializers import (
@@ -69,7 +70,7 @@ class EmailViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    # permission_classes
+    permission_classes = [IsAuthenticated, ModerPermisiion]
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
@@ -84,7 +85,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    # permission_classes
+    permission_classes = [IsAuthenticated, ModerPermisiion]
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
