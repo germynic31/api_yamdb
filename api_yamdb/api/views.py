@@ -33,8 +33,8 @@ class GenreViewSet(ListDestroyCreateMixin):
 class CategoryViewSet(ListDestroyCreateMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    
-    
+
+
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     # permission_classes
