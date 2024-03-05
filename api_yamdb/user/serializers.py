@@ -35,11 +35,9 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class SignupSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = MyUser
-        fields = ('email', 'username')
+class SignupSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=128)
+    username = serializers.CharField(max_length=150)
 
     def validate_username(self, value):
         if 'me' == value:
@@ -48,9 +46,6 @@ class SignupSerializer(serializers.ModelSerializer):
         return value
 
 
-class TokenSerializer(serializers.ModelSerializer):
-    confirmation_code = serializers.CharField()
-
-    class Meta:
-        model = MyUser
-        fields = ('username', 'confirmation_code')
+class TokenSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=128)
+    username = serializers.CharField(max_length=150)
