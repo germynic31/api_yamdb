@@ -4,6 +4,9 @@ from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from reviews.models import Category, Genre, Review, Title
 
+from user.models import MyUser
+from user.permissions import ModerPermisiion
+from reviews.models import Title, Category, Genre, Review
 from .mixins import ListDestroyCreateMixin
 from .serializers import (CategorySerializer, CommentSerializer,
                           CreateUpdateDestroyTitleSerializer, GenreSerializer,
@@ -30,11 +33,11 @@ class GenreViewSet(ListDestroyCreateMixin):
 class CategoryViewSet(ListDestroyCreateMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    
-    
+
+
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    # permission_classes
+    permission_classes = [IsAuthenticated, ModerPermisiion]
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
@@ -49,7 +52,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    # permission_classes
+    permission_classes = [IsAuthenticated, ModerPermisiion]
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
