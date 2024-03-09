@@ -8,8 +8,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api_yamdb.settings')
 if not settings.configured:
     django.setup()
 
-from reviews.models import Title, Category, Genre, GenreTitle, Comment, Review
+from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
 from user.models import MyUser
+
 
 def import_data_from_csv(file_path, model):
     with open(file_path, 'r') as file:
