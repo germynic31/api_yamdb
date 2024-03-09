@@ -24,21 +24,20 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    class CommentsSerializer(serializers.ModelSerializer):
-        author = serializers.SlugRelatedField(
-            many=False,
-            read_only=True,
-            slug_field='username'
-        )
-        review = serializers.SlugRelatedField(
-            slug_field='text',
-            many=False,
-            read_only=True
-        )
+    author = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='username'
+    )
+    review = serializers.SlugRelatedField(
+        slug_field='text',
+        many=False,
+        read_only=True
+    )
 
-        class Meta:
-            model = Comment
-            fields = ('id', 'review', 'text', 'author', 'pub_date')
+    class Meta:
+        model = Comment
+        fields = ('id', 'review', 'text', 'author', 'pub_date')
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -65,10 +64,17 @@ class ListRetrieveTitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(
         read_only=True
     )
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category', 'rating')
+
+    def get_rating(self, obj):
+        reviews = Review.objects.filter(title=obj)
+        if not reviews:
+            return None
+        return sum([r.score for r in reviews]) / len(reviews)
 
 
 class CreateUpdateDestroyTitleSerializer(serializers.ModelSerializer):
@@ -76,12 +82,12 @@ class CreateUpdateDestroyTitleSerializer(serializers.ModelSerializer):
 
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),
-        slug_field='name',
+        slug_field='slug',
         many=True
     )
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
-        slug_field='name'
+        slug_field='slug'
     )
 
     class Meta:
