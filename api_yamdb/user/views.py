@@ -4,9 +4,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from user.models import MyUser
 
-from .premissions import AdminOnly
+from user.models import MyUser
+from .permissions import AdminOnly
 from .serializers import (
     MeSerializer, SignupSerializer, TokenSerializer, UserSerializer
 )

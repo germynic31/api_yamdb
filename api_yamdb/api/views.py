@@ -2,11 +2,11 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
-from reviews.models import Category, Genre, Review, Title
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from user.models import MyUser
-from user.permissions import ModerPermisiion
+from user.permissions import IsAdminOrReadOnly, IsModerOrReadOnly
 from reviews.models import Title, Category, Genre, Review
+from .filter_sets import TitleFilter
 from .mixins import ListDestroyCreateMixin
 from .serializers import (CategorySerializer, CommentSerializer,
                           CreateUpdateDestroyTitleSerializer, GenreSerializer,
@@ -16,8 +16,10 @@ from .serializers import (CategorySerializer, CommentSerializer,
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     pagination_class = LimitOffsetPagination
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name', 'year', 'category__slug', 'genre__slug')
+    filterset_class = TitleFilter
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
@@ -37,8 +39,8 @@ class CategoryViewSet(ListDestroyCreateMixin):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticated, ModerPermisiion]
     pagination_class = LimitOffsetPagination
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_queryset(self):
         return get_object_or_404(
@@ -49,11 +51,16 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title = get_object_or_404(Title, id=title_id)
         serializer.save(title=title, author=self.request.user)
 
+    def get_permissions(self):
+        if self.request.method in ['DELETE', 'PATCH']:
+            return (IsModerOrReadOnly(),)
+        return (IsAuthenticatedOrReadOnly(),)
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated, ModerPermisiion]
     pagination_class = LimitOffsetPagination
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_queryset(self):
         return get_object_or_404(
@@ -63,3 +70,8 @@ class CommentViewSet(viewsets.ModelViewSet):
         review_id = self.kwargs.get('review_id')
         review = get_object_or_404(Review, id=review_id)
         serializer.save(review=review, author=self.request.user)
+
+    def get_permissions(self):
+        if self.request.method in ['DELETE', 'PATCH']:
+            return (IsModerOrReadOnly(),)
+        return (IsAuthenticatedOrReadOnly(),)

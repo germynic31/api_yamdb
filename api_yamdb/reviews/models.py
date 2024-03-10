@@ -80,6 +80,10 @@ class Title(models.Model):
         blank=False,
         verbose_name='Категория'
     )
+    rating = models.PositiveSmallIntegerField(
+        verbose_name='Рейтинг',
+        default=0
+    )
 
     class Meta:
         verbose_name = 'Произведение'

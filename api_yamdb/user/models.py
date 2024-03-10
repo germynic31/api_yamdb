@@ -51,7 +51,7 @@ class MyUser(AbstractUser):
 
     @property
     def is_moder(self):
-        return self.role == 'moder'
+        return self.role == 'moderator'
 
     class Meta:
         verbose_name = 'Пользователи'
