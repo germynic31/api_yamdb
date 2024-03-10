@@ -16,6 +16,7 @@ class ListDestroyCreateMixin(
     search_fields = ('name',)
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAdminOrReadOnly,)
+    lookup_field = 'slug'
 
 
 class ValidateUsernameMixin:

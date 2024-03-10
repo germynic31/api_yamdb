@@ -14,7 +14,7 @@ class IsAdminOrReadOnly(AdminOnly):
         return (
             request.method in permissions.SAFE_METHODS
             or super().has_permission(request, view)
-            )
+        )
 
 
 class ModerOnly(permissions.BasePermission):
