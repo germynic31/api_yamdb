@@ -70,7 +70,7 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     lookup_field = 'username'
-    pagination_class = (PageNumberPagination,)
+    pagination_class = (PageNumberPagination)
 
 
 class MeView(generics.RetrieveUpdateAPIView):

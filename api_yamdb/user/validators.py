@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 
 pattern = r'[\w.@+-]'
 
+
 def validate_username(username):
     if username == 'me':
         raise ValidationError(
