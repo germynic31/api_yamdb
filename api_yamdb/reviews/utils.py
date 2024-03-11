@@ -12,6 +12,5 @@ def check_confirmation_code(user, confirmation_code):
     if user.confirmation_code == confirmation_code:
         generate_confirmation_code(user)
         return True
-    else:
-        generate_confirmation_code(user)
-        return False
+    generate_confirmation_code(user)
+    return False

@@ -1,17 +1,28 @@
+from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, SAFE_METHODS
+from rest_framework import filters, generics, status, views, viewsets
+from rest_framework.pagination import (
+    LimitOffsetPagination, PageNumberPagination
+)
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly, SAFE_METHODS,
+    AllowAny, IsAuthenticated
+)
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
 
-from user.permissions import IsAdminOrReadOnly, IsModerOrReadOnly
 from reviews.models import Title, Category, Genre, Review
+from reviews.models import User
+from reviews.utils import check_confirmation_code, generate_confirmation_code
+from .permissions import IsAdminOrReadOnly, IsModerOrReadOnly, AdminOnly
 from .filter_sets import TitleFilter
 from .mixins import ListDestroyCreateMixin
 from .serializers import (
     CategorySerializer, CommentSerializer, CreateUpdateDestroyTitleSerializer,
-    GenreSerializer, ListRetrieveTitleSerializer, ReviewSerializer
+    GenreSerializer, ListRetrieveTitleSerializer, ReviewSerializer,
+    MeSerializer, SignupSerializer, TokenSerializer, UserSerializer
 )
 
 
@@ -77,3 +88,71 @@ class CommentViewSet(viewsets.ModelViewSet):
         if self.request.method in ['DELETE', 'PATCH']:
             return (IsModerOrReadOnly(),)
         return (IsAuthenticatedOrReadOnly(),)
+
+
+class SignupView(views.APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = SignupSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data.get('username')
+        email = serializer.validated_data.get('email')
+        try:
+            user, created = User.objects.get_or_create(
+                username=username,
+                email=email,
+            )
+        except Exception:
+            return Response(
+                dict(error='Username или email уже есть в системе.'),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        generate_confirmation_code(user)
+        send_mail(
+            subject='Код подтверждения',
+            message=f'Токен для подтверждения: {user.confirmation_code}',
+            from_email='from@example.com',
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class TokenView(generics.CreateAPIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = TokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data.get('username')
+        confirmation_code = serializer.validated_data.get('confirmation_code')
+        user = generics.get_object_or_404(User, username=username)
+        if check_confirmation_code(user, confirmation_code):
+            return Response(
+                dict(token=str(AccessToken.for_user(user))),
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            dict(error='Ошибка кода подтверждения.'),
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (AdminOnly, )
+    http_method_names = ('get', 'post', 'patch', 'delete')
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+    lookup_field = 'username'
+    pagination_class = (PageNumberPagination)
+
+
+class MeView(generics.RetrieveUpdateAPIView):
+    serializer_class = MeSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        return self.request.user
