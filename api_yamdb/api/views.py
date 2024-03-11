@@ -44,7 +44,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_title(self):
         if not hasattr(self, '_title'):
-            self._title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+            self._title = get_object_or_404(
+                Title, id=self.kwargs.get('title_id'))
         return self._title
 
     def get_queryset(self):
@@ -67,7 +68,8 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_review(self):
         if not hasattr(self, '_review'):
-            self._review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
+            self._review = get_object_or_404(
+                Review, id=self.kwargs.get('review_id'))
         return self._review
 
     def get_queryset(self):
