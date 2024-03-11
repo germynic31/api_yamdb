@@ -1,20 +1,22 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, SAFE_METHODS
 
 from user.permissions import IsAdminOrReadOnly, IsModerOrReadOnly
 from reviews.models import Title, Category, Genre, Review
 from .filter_sets import TitleFilter
 from .mixins import ListDestroyCreateMixin
-from .serializers import (CategorySerializer, CommentSerializer,
-                          CreateUpdateDestroyTitleSerializer, GenreSerializer,
-                          ListRetrieveTitleSerializer, ReviewSerializer)
+from .serializers import (
+    CategorySerializer, CommentSerializer, CreateUpdateDestroyTitleSerializer,
+    GenreSerializer, ListRetrieveTitleSerializer, ReviewSerializer
+)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
@@ -22,7 +24,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
+        if self.request.method in SAFE_METHODS:
             return ListRetrieveTitleSerializer
         return CreateUpdateDestroyTitleSerializer
 

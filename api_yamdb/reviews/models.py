@@ -1,17 +1,18 @@
-from datetime import datetime
-
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
+
 from user.models import MyUser
+from .validators import year_validator
+from .consts import NAME_LENGTH, SLUG_LENGTH
 
 
 class Genre(models.Model):
     name = models.CharField(
-        max_length=256,
+        max_length=NAME_LENGTH,
         verbose_name='Название'
     )
     slug = models.SlugField(
-        max_length=50,
+        max_length=SLUG_LENGTH,
         unique=True,
         verbose_name='slug'
     )
@@ -19,6 +20,7 @@ class Genre(models.Model):
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -26,11 +28,11 @@ class Genre(models.Model):
 
 class Category(models.Model):
     name = models.CharField(
-        max_length=256,
+        max_length=NAME_LENGTH,
         verbose_name='Название'
     )
     slug = models.SlugField(
-        max_length=50,
+        max_length=SLUG_LENGTH,
         unique=True,
         verbose_name='slug'
     )
@@ -38,6 +40,7 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -45,20 +48,11 @@ class Category(models.Model):
 
 class Title(models.Model):
     name = models.CharField(
-        max_length=256,
+        max_length=NAME_LENGTH,
         verbose_name='Название'
     )
     year = models.IntegerField(
-        validators=[
-            MinValueValidator(
-                0,
-                'Год выпуска произведения не может быть меньше 0'
-            ),
-            MaxValueValidator(
-                datetime.now().year,
-                'Год выпуска произведения не может быть больше текущего'
-            )
-        ],
+        validators=[year_validator],
         verbose_name='Год выпуска'
     )
     description = models.TextField(
@@ -79,10 +73,6 @@ class Title(models.Model):
         null=True,
         blank=False,
         verbose_name='Категория'
-    )
-    rating = models.PositiveSmallIntegerField(
-        verbose_name='Рейтинг',
-        default=0
     )
 
     class Meta:
