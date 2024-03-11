@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
@@ -64,19 +65,13 @@ class ListRetrieveTitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(
         read_only=True
     )
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
         fields = (
-            'id', 'name', 'year', 'description', 'genre', 'category', 'rating'
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
-
-    def get_rating(self, obj):
-        reviews = Review.objects.filter(title=obj)
-        if not reviews:
-            return None
-        return sum([r.score for r in reviews]) / len(reviews)
 
 
 class CreateUpdateDestroyTitleSerializer(serializers.ModelSerializer):
