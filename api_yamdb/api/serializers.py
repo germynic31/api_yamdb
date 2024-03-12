@@ -1,6 +1,9 @@
 from rest_framework import serializers
 
-from reviews.models import Title, Genre, Category, Review, Comment
+from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import User
+from reviews import consts
+from .mixins import ValidateUsernameMixin
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -25,8 +28,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         return data
 
 
-class CommentSerializer(serializers.ModelSerializer):
-    class CommentsSerializer(serializers.ModelSerializer):
+class CommentsSerializer(serializers.ModelSerializer):
         author = serializers.SlugRelatedField(
             many=False,
             read_only=True,
@@ -62,10 +64,13 @@ class ListRetrieveTitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(
         read_only=True
     )
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        fields = (
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        )
 
 
 class CreateUpdateDestroyTitleSerializer(serializers.ModelSerializer):
@@ -73,14 +78,39 @@ class CreateUpdateDestroyTitleSerializer(serializers.ModelSerializer):
 
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),
-        slug_field='name',
+        slug_field='slug',
         many=True
     )
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
-        slug_field='name'
+        slug_field='slug'
     )
 
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+
+
+class SignupSerializer(serializers.Serializer, ValidateUsernameMixin):
+    email = serializers.EmailField(max_length=consts.EMAIL_LENGTH, required=True)
+    username = serializers.CharField(max_length=consts.USERNAME_LENGTH, required=True)
+
+
+class TokenSerializer(serializers.Serializer, ValidateUsernameMixin):
+    username = serializers.CharField(max_length=consts.USERNAME_LENGTH, required=True)
+    confirmation_code = serializers.CharField(max_length=consts.CONFIRMATION_CODE_LENGTH, required=True)
+
+
+class UserSerializer(serializers.ModelSerializer, ValidateUsernameMixin):
+
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
+
+
+class MeSerializer(UserSerializer):
+
+    class Meta(UserSerializer.Meta):
+        read_only_fields = ('role',)
