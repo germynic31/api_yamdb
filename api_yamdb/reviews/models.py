@@ -162,15 +162,24 @@ class GenreTitle(models.Model):
         return f'{self.title}, {self.genre}'
 
 
-class Review(models.Model):
+class BaseModel(models.Model):
+    text = models.TextField(
+        verbose_name='Текст записи'
+    )
+    pub_date = models.DateTimeField(
+        'Дата публикации', auto_now_add=True
+    )
+
+    class Meta:
+        abstract = True
+
+
+class Review(BaseModel):
     title = models.ForeignKey(
         Title,
         related_name='reviews',
         verbose_name='Произведение',
         on_delete=models.CASCADE,
-    )
-    text = models.TextField(
-        verbose_name='Текст ревью',
     )
     author = models.ForeignKey(
         User,
@@ -184,9 +193,6 @@ class Review(models.Model):
             MinValueValidator(1, 'Разрешены значения от 1 до 10'),
             MaxValueValidator(10, 'Разрешены значения от 1 до 10')
         ]
-    )
-    pub_date = models.DateTimeField(
-        verbose_name='Дата создания', auto_now_add=True, db_index=True
     )
 
     class Meta:
@@ -204,7 +210,7 @@ class Review(models.Model):
         return self.text[:50]
 
 
-class Comment(models.Model):
+class Comment(BaseModel):
     review = models.ForeignKey(
         Review,
         verbose_name='Отзыв',
@@ -216,13 +222,6 @@ class Comment(models.Model):
         verbose_name='Пользователь',
         on_delete=models.CASCADE,
         related_name='comments'
-    )
-    text = models.TextField(
-        verbose_name='Текст комментария'
-    )
-    pub_date = models.DateTimeField(
-        verbose_name='Дата публикации',
-        auto_now_add=True,
     )
 
     class Meta:
