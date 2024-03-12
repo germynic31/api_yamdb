@@ -26,7 +26,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_filters',
 
-    'user.apps.UserConfig',
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
 ]
@@ -110,7 +109,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
-AUTH_USER_MODEL = 'user.MyUser'
+AUTH_USER_MODEL = 'reviews.User'
 
 
 REST_FRAMEWORK = {

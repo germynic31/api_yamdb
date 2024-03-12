@@ -1,9 +1,70 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-from user.models import MyUser
-from .validators import year_validator
-from .consts import NAME_LENGTH, SLUG_LENGTH
+from .validators import validate_username, year_validator
+from .consts import (
+    NAME_LENGTH, SLUG_LENGTH, USERNAME_LENGTH,
+    FIRST_NAME_LENGTH, LAST_NAME_LENGTH,
+    EMAIL_LENGTH, ROLE_LENGTH,
+    BIO_LENGTH, CONFIRMATION_CODE_LENGTH,
+    ADMIN_ROLE, MODER_ROLE
+)
+
+
+class User(AbstractUser):
+    class Roles(models.TextChoices):
+        user = 'user', 'Пользователь'
+        moderator = 'moderator', 'Модератор'
+        admin = 'admin', 'Администратор'
+
+    username = models.CharField(
+        verbose_name='имя пользователя',
+        max_length=USERNAME_LENGTH,
+        unique=True,
+        validators=(validate_username,)
+    )
+    first_name = models.CharField(
+        'имя',
+        max_length=FIRST_NAME_LENGTH,
+        blank=True)
+    last_name = models.CharField(
+        'фамилия',
+        max_length=LAST_NAME_LENGTH,
+        blank=True)
+    email = models.EmailField(
+        'адрес электронной почты',
+        max_length=EMAIL_LENGTH,
+        unique=True,
+    )
+    role = models.CharField(
+        'роль',
+        max_length=ROLE_LENGTH,
+        choices=Roles.choices,
+        default=Roles.user
+    )
+    bio = models.CharField(
+        'биография',
+        max_length=BIO_LENGTH,
+        blank=True
+    )
+    confirmation_code = models.CharField(max_length=CONFIRMATION_CODE_LENGTH)
+
+    @property
+    def is_admin(self):
+        return (
+            self.is_superuser or self.role == ADMIN_ROLE
+        )
+
+    @property
+    def is_moder(self):
+        return self.role == MODER_ROLE
+
+    class Meta:
+        verbose_name = 'Пользователи'
+        verbose_name_plural = 'пользователи'
+        default_related_name = 'users'
+        ordering = ('username',)
 
 
 class Genre(models.Model):
@@ -112,7 +173,7 @@ class Review(models.Model):
         verbose_name='Текст ревью',
     )
     author = models.ForeignKey(
-        MyUser,
+        User,
         on_delete=models.CASCADE,
         related_name='reviews',
         verbose_name='Автор',
@@ -151,7 +212,7 @@ class Comment(models.Model):
         related_name='comments'
     )
     author = models.ForeignKey(
-        MyUser,
+        User,
         verbose_name='Пользователь',
         on_delete=models.CASCADE,
         related_name='comments'

@@ -2,8 +2,8 @@ from rest_framework import mixins, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
 
-from user.validators import validate_username
-from user.permissions import IsAdminOrReadOnly
+from reviews.validators import validate_username
+from .permissions import IsAdminOrReadOnly
 
 
 class ListDestroyCreateMixin(
