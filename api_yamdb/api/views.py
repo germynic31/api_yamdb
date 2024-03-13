@@ -147,10 +147,10 @@ class UserViewSet(viewsets.ModelViewSet):
     pagination_class = (PageNumberPagination)
 
     @action(
-            detail=False,
-            methods=['get', 'patch'],
-            url_path='me',
-            permission_classes=(IsAuthenticated,)
+        detail=False,
+        methods=['get', 'patch'],
+        url_path='me',
+        permission_classes=(IsAuthenticated,)
     )
     def me(self, request):
         if request.method == 'GET':
