@@ -3,6 +3,7 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics, status, views, viewsets
+from rest_framework.decorators import action
 from rest_framework.pagination import (
     LimitOffsetPagination, PageNumberPagination
 )
@@ -15,7 +16,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Title, Category, Genre, Review
 from reviews.models import User
-from reviews.utils import check_confirmation_code, generate_confirmation_code
+from reviews.utils import generate_confirmation_code
 from .permissions import IsAdminOrReadOnly, IsModerOrReadOnly, AdminOnly
 from .filter_sets import TitleFilter
 from .mixins import ListDestroyCreateMixin
@@ -98,16 +99,10 @@ class SignupView(views.APIView):
         serializer.is_valid(raise_exception=True)
         username = serializer.validated_data.get('username')
         email = serializer.validated_data.get('email')
-        try:
-            user, created = User.objects.get_or_create(
-                username=username,
-                email=email,
-            )
-        except Exception:
-            return Response(
-                dict(error='Username или email уже есть в системе.'),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        user, created = User.objects.get_or_create(
+            username=username,
+            email=email,
+        )
         generate_confirmation_code(user)
         send_mail(
             subject='Код подтверждения',
@@ -126,22 +121,16 @@ class TokenView(generics.CreateAPIView):
         serializer = TokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         username = serializer.validated_data.get('username')
-        confirmation_code = serializer.validated_data.get('confirmation_code')
         user = generics.get_object_or_404(User, username=username)
-        if check_confirmation_code(user, confirmation_code):
-            return Response(
-                dict(token=str(AccessToken.for_user(user))),
-                status=status.HTTP_200_OK
-            )
+        generate_confirmation_code(user)
         return Response(
-            dict(error='Ошибка кода подтверждения.'),
-            status=status.HTTP_400_BAD_REQUEST
+            dict(token=str(AccessToken.for_user(user))),
+            status=status.HTTP_200_OK
         )
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
     permission_classes = (AdminOnly, )
     http_method_names = ('get', 'post', 'patch', 'delete')
     filter_backends = (filters.SearchFilter,)
@@ -149,10 +138,25 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     pagination_class = (PageNumberPagination)
 
+    @action(
+            detail=False,
+            methods=['get', 'patch'],
+            url_path='me',
+            permission_classes=(IsAuthenticated,)
+    )
+    def me(self, request):
+        if request.method == 'GET':
+            user = get_object_or_404(User, username=self.request.user.username)
+            serializer = self.get_serializer(user, many=False)
+            return Response(serializer.data)
+        user = self.request.user
+        serializer = MeSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
-class MeView(generics.RetrieveUpdateAPIView):
-    serializer_class = MeSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def get_object(self):
-        return self.request.user
+    def get_serializer_class(self):
+        if self.action == 'me':
+            return MeSerializer
+        return UserSerializer

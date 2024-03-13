@@ -6,11 +6,3 @@ def generate_confirmation_code(user):
     user.confirmation_code = confirmation_code
     user.save()
     return confirmation_code
-
-
-def check_confirmation_code(user, confirmation_code):
-    if user.confirmation_code == confirmation_code:
-        generate_confirmation_code(user)
-        return True
-    generate_confirmation_code(user)
-    return False
