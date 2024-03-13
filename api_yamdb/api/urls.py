@@ -3,7 +3,7 @@ from rest_framework import routers
 
 from .views import (
     ReviewViewSet, CommentViewSet, TitleViewSet, GenreViewSet, CategoryViewSet,
-    MeView, SignupView, TokenView, UserViewSet
+    SignupView, TokenView, UserViewSet
 )
 
 
@@ -26,6 +26,5 @@ router_v1.register('users', UserViewSet, basename='users')
 urlpatterns = [
     path('v1/auth/signup/', SignupView.as_view(), name='signup'),
     path('v1/auth/token/', TokenView.as_view(), name='token'),
-    path('v1/users/me/', MeView.as_view(), name='me'),
     path('v1/', include(router_v1.urls)),
 ]

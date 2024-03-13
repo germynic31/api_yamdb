@@ -21,5 +21,6 @@ class ListDestroyCreateMixin(
 
 class ValidateUsernameMixin:
 
-    def validate_username(self, username):
+    @staticmethod
+    def validate_username(username):
         return validate_username(username)
