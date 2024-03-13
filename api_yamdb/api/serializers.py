@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import serializers, validators
+from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from reviews.models import User
