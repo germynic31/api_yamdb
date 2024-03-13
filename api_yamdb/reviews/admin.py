@@ -1,11 +1,24 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from user.models import MyUser
+
+from reviews.models import (
+    Category, Genre, GenreTitle,
+    Title, Review, Comment, User
+)
 
 
-@admin.register(MyUser)
-class MyUserAdmin(admin.ModelAdmin):
-    model = MyUser
+class GenreTitleInline(admin.TabularInline):
+    model = GenreTitle
+
+
+@admin.register(Title)
+class TitleAdmin(admin.ModelAdmin):
+    inlines = (GenreTitleInline,)
+
+
+@admin.register(User)
+class AdminUser(admin.ModelAdmin):
+    model = User
     list_display = (
         'username',
         'email',
@@ -43,3 +56,9 @@ class MyUserAdmin(admin.ModelAdmin):
             }
         )
     )
+
+
+admin.site.register(Genre)
+admin.site.register(Category)
+admin.site.register(Review)
+admin.site.register(Comment)
