@@ -8,15 +8,16 @@ from .consts import (
     FIRST_NAME_LENGTH, LAST_NAME_LENGTH,
     EMAIL_LENGTH, ROLE_LENGTH,
     BIO_LENGTH, CONFIRMATION_CODE_LENGTH,
-    ADMIN_ROLE, MODER_ROLE
+    ADMIN_ROLE, MODER_ROLE, SLICE_LENGTH,
+    USER_ROLE
 )
 
 
 class User(AbstractUser):
     class Roles(models.TextChoices):
-        user = 'user', 'Пользователь'
-        moderator = 'moderator', 'Модератор'
-        admin = 'admin', 'Администратор'
+        user = USER_ROLE, 'Пользователь'
+        moderator = MODER_ROLE, 'Модератор'
+        admin = ADMIN_ROLE, 'Администратор'
 
     username = models.CharField(
         verbose_name='имя пользователя',
@@ -84,7 +85,7 @@ class Genre(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return self.name[:SLICE_LENGTH]
 
 
 class Category(models.Model):
@@ -104,7 +105,7 @@ class Category(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return self.name[:SLICE_LENGTH]
 
 
 class Title(models.Model):
@@ -117,7 +118,6 @@ class Title(models.Model):
         verbose_name='Год выпуска'
     )
     description = models.TextField(
-        null=True,
         blank=True,
         verbose_name='Описание'
     )
@@ -141,7 +141,7 @@ class Title(models.Model):
         verbose_name_plural = 'Произведения'
 
     def __str__(self):
-        return self.name
+        return self.name[:SLICE_LENGTH]
 
 
 class GenreTitle(models.Model):
@@ -207,7 +207,7 @@ class Review(BaseModel):
         ]
 
     def __str__(self):
-        return self.text[:50]
+        return self.text[:SLICE_LENGTH]
 
 
 class Comment(BaseModel):
@@ -230,4 +230,4 @@ class Comment(BaseModel):
         ordering = ['-pub_date']
 
     def __str__(self):
-        return self.text[:50]
+        return self.text[:SLICE_LENGTH]
