@@ -12,11 +12,11 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='username',
     )
-    title = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Review
         fields = ('title', 'text', 'author', 'score', 'pub_date', 'id')
+        read_only_fields = ('title',)
 
     def validate(self, data):
         if self.context['request'].method != 'POST':
