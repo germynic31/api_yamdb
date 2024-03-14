@@ -8,15 +8,16 @@ from .consts import (
     FIRST_NAME_LENGTH, LAST_NAME_LENGTH,
     EMAIL_LENGTH, ROLE_LENGTH,
     BIO_LENGTH, CONFIRMATION_CODE_LENGTH,
-    ADMIN_ROLE, MODER_ROLE, SLICE_LENGTH
+    ADMIN_ROLE, MODER_ROLE, SLICE_LENGTH,
+    USER_ROLE
 )
 
 
 class User(AbstractUser):
     class Roles(models.TextChoices):
-        user = 'user', 'Пользователь'
-        moderator = 'moderator', 'Модератор'
-        admin = 'admin', 'Администратор'
+        user = USER_ROLE, 'Пользователь'
+        moderator = MODER_ROLE, 'Модератор'
+        admin = ADMIN_ROLE, 'Администратор'
 
     username = models.CharField(
         verbose_name='имя пользователя',
