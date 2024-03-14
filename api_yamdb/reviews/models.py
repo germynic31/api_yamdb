@@ -8,7 +8,8 @@ from .consts import (
     FIRST_NAME_LENGTH, LAST_NAME_LENGTH,
     EMAIL_LENGTH, ROLE_LENGTH,
     BIO_LENGTH, CONFIRMATION_CODE_LENGTH,
-    ADMIN_ROLE, MODER_ROLE, USER_ROLE
+    ADMIN_ROLE, MODER_ROLE, SLICE_LENGTH,
+    USER_ROLE
 )
 
 
@@ -84,7 +85,7 @@ class Genre(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return self.name[:SLICE_LENGTH]
 
 
 class Category(models.Model):
@@ -104,7 +105,7 @@ class Category(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return self.name[:SLICE_LENGTH]
 
 
 class Title(models.Model):
@@ -117,7 +118,6 @@ class Title(models.Model):
         verbose_name='Год выпуска'
     )
     description = models.TextField(
-        null=True,
         blank=True,
         verbose_name='Описание'
     )
@@ -141,7 +141,7 @@ class Title(models.Model):
         verbose_name_plural = 'Произведения'
 
     def __str__(self):
-        return self.name
+        return self.name[:SLICE_LENGTH]
 
 
 class GenreTitle(models.Model):
@@ -162,15 +162,24 @@ class GenreTitle(models.Model):
         return f'{self.title}, {self.genre}'
 
 
-class Review(models.Model):
+class BaseModel(models.Model):
+    text = models.TextField(
+        verbose_name='Текст записи'
+    )
+    pub_date = models.DateTimeField(
+        'Дата публикации', auto_now_add=True
+    )
+
+    class Meta:
+        abstract = True
+
+
+class Review(BaseModel):
     title = models.ForeignKey(
         Title,
         related_name='reviews',
         verbose_name='Произведение',
         on_delete=models.CASCADE,
-    )
-    text = models.TextField(
-        verbose_name='Текст ревью',
     )
     author = models.ForeignKey(
         User,
@@ -185,9 +194,6 @@ class Review(models.Model):
             MaxValueValidator(10, 'Разрешены значения от 1 до 10')
         ]
     )
-    pub_date = models.DateTimeField(
-        verbose_name='Дата создания', auto_now_add=True, db_index=True
-    )
 
     class Meta:
         ordering = ['-pub_date']
@@ -201,10 +207,10 @@ class Review(models.Model):
         ]
 
     def __str__(self):
-        return self.text[:50]
+        return self.text[:SLICE_LENGTH]
 
 
-class Comment(models.Model):
+class Comment(BaseModel):
     review = models.ForeignKey(
         Review,
         verbose_name='Отзыв',
@@ -217,13 +223,6 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments'
     )
-    text = models.TextField(
-        verbose_name='Текст комментария'
-    )
-    pub_date = models.DateTimeField(
-        verbose_name='Дата публикации',
-        auto_now_add=True,
-    )
 
     class Meta:
         verbose_name = 'Комментарий'
@@ -231,4 +230,4 @@ class Comment(models.Model):
         ordering = ['-pub_date']
 
     def __str__(self):
-        return self.text[:50]
+        return self.text[:SLICE_LENGTH]

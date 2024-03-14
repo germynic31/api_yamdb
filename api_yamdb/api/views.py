@@ -56,13 +56,17 @@ class ReviewViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     http_method_names = ('get', 'post', 'patch', 'delete')
 
+    def get_title(self):
+        if not hasattr(self, '_title'):
+            self._title = get_object_or_404(
+                Title, id=self.kwargs.get('title_id'))
+        return self._title
+
     def get_queryset(self):
-        return get_object_or_404(
-            Title, id=self.kwargs.get('title_id')).reviews.all()
+        return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
-        title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Title, id=title_id)
+        title = self.get_title()
         serializer.save(title=title, author=self.request.user)
 
     def get_permissions(self):
@@ -76,13 +80,17 @@ class CommentViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     http_method_names = ('get', 'post', 'patch', 'delete')
 
+    def get_review(self):
+        if not hasattr(self, '_review'):
+            self._review = get_object_or_404(
+                Review, id=self.kwargs.get('review_id'))
+        return self._review
+
     def get_queryset(self):
-        return get_object_or_404(
-            Review, id=self.kwargs.get('review_id')).comments.all()
+        return self.get_review().comments.all()
 
     def perform_create(self, serializer):
-        review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(Review, id=review_id)
+        review = self.get_review()
         serializer.save(review=review, author=self.request.user)
 
     def get_permissions(self):
@@ -139,10 +147,10 @@ class UserViewSet(viewsets.ModelViewSet):
     pagination_class = (PageNumberPagination)
 
     @action(
-            detail=False,
-            methods=['get', 'patch'],
-            url_path='me',
-            permission_classes=(IsAuthenticated,)
+        detail=False,
+        methods=['get', 'patch'],
+        url_path='me',
+        permission_classes=(IsAuthenticated,)
     )
     def me(self, request):
         if request.method == 'GET':
